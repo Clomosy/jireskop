@@ -10,7 +10,7 @@ Var
   myDeviceManager:TclDeviceManager;
   HoleMin_X,HoleMax_X : Single; // Ball must be placed inside these coordinates
   HoleMin_Y,HoleMax_Y : Single;
-  
+  number:Integer;
   procedure geriprcdr
   begin
   TclProButton(MyForm.clFindComponent('BtnGoBack')).Click;
@@ -28,23 +28,32 @@ Var
       Result := True;
   end;
 
-  Procedure ProcOnGameTimer;
+
+procedure randomNumber
+  
+  begin
+    number := Random() *  TForm(MyForm).ClientWidth; 
+   
+end;
+
+  procedure ProcOnGameTimer;
   Const 
     BallSpeed = 5;
+    
   begin
     //LblDisplay.Text := FormatDateTime('yymmdd0hhnnss', Now);
     //Clomosy.ProcessMessage;
-    If Clomosy.PlatformIsMobile Then
-    Begin
-      Case DeviceMotionSensor.GetDirectionX of 
+    if Clomosy.PlatformIsMobile then
+    begin
+      Case DeviceMotionSensor.GetDirectionX of
         1:ImgBall.Position.X := ImgBall.Position.X - BallSpeed;//Move left
         2:ImgBall.Position.X := ImgBall.Position.X + BallSpeed;//Move right
-      End;
-      Case DeviceMotionSensor.GetDirectionY of 
+      end;
+      Case DeviceMotionSensor.GetDirectionY of
         1:ImgBall.Position.Y := ImgBall.Position.Y - BallSpeed;//Move up
         2:ImgBall.Position.Y := ImgBall.Position.Y + BallSpeed;//Move down
-      End;
-      if (ImgBall.Position.X + ImgBall.Width) > TForm(MyForm).ClientWidth then  // Form Right border control
+      end;
+      if (ImgBall.Position.X + ImgBall.Width) > TForm(MyForm).ClientWidth  then // Form Right border control
         ImgBall.Position.X := TForm(MyForm).ClientWidth - ImgBall.Width;
     
       if (ImgBall.Position.X) < 0 then // Left border control
@@ -53,40 +62,49 @@ Var
       if (ImgBall.Position.Y + ImgBall.Height) > TForm(MyForm).ClientHeight then  // Form Bottom border control
         ImgBall.Position.Y := TForm(MyForm).ClientHeight - ImgBall.Height;
     
-      if (ImgBall.Position.Y < 0) then  // Top border control
+      if (ImgBall.Position.Y < 0) then // Top border control
         ImgBall.Position.Y := 0;
         
       if isBallinTheHole then
       begin
         GameTimer.Enabled := False;
-        ImgBall.Position.X := HoleMin_X;
+        ImgBall.Position.X := HoleMin_X*1.75;
         ImgBall.Position.Y := HoleMin_Y;
         //ShowMessage(ImgBall.Position.X);
-        If Clomosy.PlatformIsMobile Then DeviceMotionSensor.Active := False;//game stopped
+        if Clomosy.PlatformIsMobile then
+        DeviceMotionSensor.Active := False;//game stopped
+        
         BtnStartGame.Text := 'START GAME';
         MyForm.PlayGameSound(SoundIndex);
         myDeviceManager.Vibrate(1000);
+      
         ShowMessage('Tebrikler');
-        //Buraya
+        randomNumber;
       end;
         
-    End;
-  End
-  Procedure BtnStartGameClick;
+    end;
+  end;
+  procedure BtnStartGameClick;
   begin
     GameTimer.Enabled := Not GameTimer.Enabled;
-    If GameTimer.Enabled Then BtnStartGame.Text := 'STOP GAME' ELSE BtnStartGame.Text := 'START GAME';
-    If GameTimer.Enabled Then
-    Begin
+    if GameTimer.Enabled then
+    BtnStartGame.Text := 'STOP GAME' 
+    else 
+    BtnStartGame.Text := 'START GAME';
+    if GameTimer.Enabled then
+    begin
       ImgBall.Align := alNone;
-      ImgBall.Position.x := 0;
+      ImgBall.Position.x := number;
       ImgBall.Position.y := 0;
 //      LblDisplay.Text := IntToStr(ImgBall.Position.x);
-      If Clomosy.PlatformIsMobile Then DeviceMotionSensor.Active := True;
-    End Else If Clomosy.PlatformIsMobile Then DeviceMotionSensor.Active := False;//game stopped
-  End;
+      if Clomosy.PlatformIsMobile then
+      DeviceMotionSensor.Active := True;
+    end; 
+    Else if Clomosy.PlatformIsMobile then 
+    DeviceMotionSensor.Active := False;//game stopped
+  end;
   
-Begin
+begin
   //exit;
   MyForm := TclGameForm.Create(Self);
   myDeviceManager := TclDeviceManager.Create;
@@ -112,7 +130,7 @@ Begin
   MyForm.AddNewEvent(BtnStartGame,tbeOnClick,'BtnStartGameClick');
   
   geribtn := MyForm.AddNewProButton(MyForm,'geribtn','');
-  clComponent.SetupComponent(geribtn,'{"Align" : "None","Width":70,"Height":50,"ImgUrl":"https://img.icons8.com/flat-round/64/circled-left.png"}');
+  clComponent.SetupComponent(geribtn,'{"Align" : "None","Width":70,"Height":50,"ImgUrl":"https://clomosy.com/demos/goback.png"}');
   MyForm.AddNewEvent(geribtn,tbeOnClick,'geriprcdr');
   geribtn.Position.X:=5;
   geribtn.Position.Y:=7;
@@ -131,12 +149,12 @@ Begin
   ImgBall.Align := alCenter;
   
   //ShowMessage(ImgBall.Position.Y);
-  HoleMin_X := ImgBall.Position.X;
-  HoleMax_X := HoleMin_X + ImgBall.Width; // Ball must be placed inside these coordinates
+  HoleMin_X := ImgBall.Position.X/1.75;
+  HoleMax_X := HoleMin_X + (ImgBall.Width*5); // Ball must be placed inside these coordinates
   
   HoleMin_Y := ImgBall.Position.Y+18;//LblDisplay.Visible true oldugunda orta nokta alınırken android de yanlış hesaplanıyor
   HoleMax_Y := HoleMin_Y + ImgBall.Height;
-  ImgBall.Align := alNone;
+  //ImgBall.Align := alNone;
   ImgBall.Position.Y := HoleMin_Y;
   //ShowMessage(ImgBall.Position.Y);
   //ShowMessage(HoleMin_Y);
@@ -150,6 +168,9 @@ Begin
   //LblDisplay.Text := IntToStr(TForm(MyForm).ClientHeight) + '/' + IntToStr(TForm(MyForm).ClientWidth);
   
   //DeviceMotionSensor.Active := Clomosy.PlatformIsMobile;
+  if Clomosy.PlatformIsMobile then
   MyForm.Run;
+  else
+  MyForm.RunModal;
   
-End;
+end;

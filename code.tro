@@ -10,7 +10,7 @@ Var
   myDeviceManager:TclDeviceManager;
   HoleMin_X,HoleMax_X : Single; // Ball must be placed inside these coordinates
   HoleMin_Y,HoleMax_Y : Single;
-  
+  number:Integer;
   void geriprcdr
   {
   TclProButton(MyForm.clFindComponent('BtnGoBack')).Click;
@@ -28,9 +28,18 @@ Var
       Result = True;
   }
 
+
+void randomNumber
+  
+  {
+    number = Random() *  TForm(MyForm).ClientWidth; 
+   
+}
+
   void ProcOnGameTimer;
   Const 
     BallSpeed = 5;
+    
   {
     //LblDisplay.Text = FormatDateTime('yymmdd0hhnnss', Now);
     //Clomosy.ProcessMessage;
@@ -61,15 +70,16 @@ Var
       if (isBallinTheHole )
       {
         GameTimer.Enabled = False;
-        ImgBall.Position.X = HoleMin_X;
+        ImgBall.Position.X = HoleMin_X*1.75;
         ImgBall.Position.Y = HoleMin_Y;
         //ShowMessage(ImgBall.Position.X);
         if (Clomosy.PlatformIsMobile ) DeviceMotionSensor.Active = False;//game stopped
         BtnStartGame.Text = 'START GAME';
         MyForm.PlayGameSound(SoundIndex);
         myDeviceManager.Vibrate(1000);
+      
         ShowMessage('Tebrikler');
-        //Buraya
+        randomNumber;
       }
         
     }
@@ -81,7 +91,7 @@ Var
     if (GameTimer.Enabled )
     {
       ImgBall.Align = alNone;
-      ImgBall.Position.x = 0;
+      ImgBall.Position.x = number;
       ImgBall.Position.y = 0;
 //      LblDisplay.Text = IntToStr(ImgBall.Position.x);
       if (Clomosy.PlatformIsMobile ) DeviceMotionSensor.Active = True;
@@ -114,7 +124,7 @@ Var
   MyForm.AddNewEvent(BtnStartGame,tbeOnClick,'BtnStartGameClick');
   
   geribtn = MyForm.AddNewProButton(MyForm,'geribtn','');
-  clComponent.SetupComponent(geribtn,'{"Align" : "None","Width":70,"Height":50,"ImgUrl":"https://img.icons8.com/flat-round/64/circled-left.png"}');
+  clComponent.SetupComponent(geribtn,'{"Align" : "None","Width":70,"Height":50,"ImgUrl":"https://clomosy.com/demos/goback.png"}');
   MyForm.AddNewEvent(geribtn,tbeOnClick,'geriprcdr');
   geribtn.Position.X=5;
   geribtn.Position.Y=7;
@@ -133,12 +143,12 @@ Var
   ImgBall.Align = alCenter;
   
   //ShowMessage(ImgBall.Position.Y);
-  HoleMin_X = ImgBall.Position.X;
-  HoleMax_X = HoleMin_X + ImgBall.Width; // Ball must be placed inside these coordinates
+  HoleMin_X = ImgBall.Position.X/1.75;
+  HoleMax_X = HoleMin_X + (ImgBall.Width*5); // Ball must be placed inside these coordinates
   
   HoleMin_Y = ImgBall.Position.Y+18;//LblDisplay.Visible true oldugunda orta nokta alınırken android de yanlış hesaplanıyor
   HoleMax_Y = HoleMin_Y + ImgBall.Height;
-  ImgBall.Align = alNone;
+  //ImgBall.Align = alNone;
   ImgBall.Position.Y = HoleMin_Y;
   //ShowMessage(ImgBall.Position.Y);
   //ShowMessage(HoleMin_Y);
@@ -152,6 +162,9 @@ Var
   //LblDisplay.Text = IntToStr(TForm(MyForm).ClientHeight) + '/' + IntToStr(TForm(MyForm).ClientWidth);
   
   //DeviceMotionSensor.Active = Clomosy.PlatformIsMobile;
+  if(Clomosy.PlatformIsMobile) 
   MyForm.Run;
+  else
+  MyForm.RunModal;
   
 }
